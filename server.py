@@ -1,8 +1,9 @@
 import socket
 import sys
 import os
-from dotenv import load_dotenv
+from time import sleep
 
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -13,36 +14,43 @@ socket_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 socket_server.bind(server_address)
 socket_server.listen()
 
+stdout_msg_to_client = sys.stdout
+
 while True:
     try:
-        print('Wait connection...')
+        stdout_msg_to_client.write('Wait connection...\n')
         client_connection, client_address = socket_server.accept()
 
     except KeyboardInterrupt:
         socket_server.close()
-        print(end='\r')
         sys.exit()
 
     try:
-        print('Connected:', client_address)
-
+        stdout_msg_to_client.write('Connected: ')
+        stdout_msg_to_client.write(str(client_address) + '\n')
         while True:
             data = client_connection.recv(1024)
-            print(f'Information received {data.decode("utf-8")}')
+            stdout_msg_to_client.write('Information received: \n')
+            message = data.decode("utf-8")
+            for msg in message:
+                stdout_msg_to_client.flush()
+                sleep(0.3)
+                stdout_msg_to_client.write(msg)
 
             if data:
-                print('Data processing')
-                print('Sending to the client')
+                stdout_msg_to_client.write(
+                    'Data processing\nSending to the client\n'
+                )
                 data = data.decode('utf-8')
                 data = data.upper().encode('utf-8')
                 client_connection.sendall(
                     'Response: '.encode('utf-8') + data
                 )
             else:
-                print('No data from', client_address)
+                stdout_msg_to_client.write('No data')
                 break
 
     except KeyboardInterrupt:
         socket_server.close()
-        print(end='\r')
         sys.exit()
+

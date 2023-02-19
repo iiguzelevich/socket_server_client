@@ -9,7 +9,7 @@ load_dotenv()
 server_address = (os.getenv('HOST'), int(os.getenv('PORT')))
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.settimeout(1)
+client_socket.settimeout(float(os.getenv('Timeout')))
 client_socket.connect(server_address)
 
 stdin_msg = sys.stdin
@@ -41,5 +41,4 @@ while True:
 
     except KeyboardInterrupt:
         client_socket.close()
-        print(end='\r')
         sys.exit()
